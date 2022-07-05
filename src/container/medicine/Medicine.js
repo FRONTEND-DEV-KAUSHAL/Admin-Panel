@@ -11,11 +11,19 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import * as yup from 'yup';
 import { Form, Formik, useFormik } from 'formik';
 import { DataGrid } from '@mui/x-data-grid';
-
+import { Tooltip } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 
 function Medicines(props) {
     const [open, setOpen] = useState(false);
+    const [dopen, setDOpen] = useState(false);
     const [data, setData] = useState([]);
+    const [did, setDid] = useState(0)
+    const [update, setUpadate] = useState(false)
+
+    const handleDClickOpen = () => {
+        setDOpen(true);
+    };
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -23,6 +31,7 @@ function Medicines(props) {
 
     const handleClose = () => {
         setOpen(false);
+        setDOpen(false);
         formikObj.resetForm()
 
     };
@@ -66,20 +75,29 @@ function Medicines(props) {
         validationSchema: schema,
         onSubmit: values => {
             handleInsert(values);
-            //  alert(JSON.stringify(values, null, 2));
         },
         enableReinitialize: true,
     });
 
-    const { handleChange, errors, handleSubmit, handleBlur, touched } = formikObj;
+    const { handleChange, errors, handleSubmit, handleBlur, touched, values } = formikObj;
 
+    const handleUpdate = (params) => {
+        console.log(params);
+        formikObj.setValues(params.row)
+        handleClickOpen();
+        setUpadate(true)
+    }
 
-    const handleDelete =(params)=>{
-        // console.log(params.id);
-        let localData =JSON.parse(localStorage.getItem("medicine"));
-        let fData = localData.filter((l)=> l.id !== params.id)
-        localStorage.setItem("medicine", JSON.stringify(fData))
-        loadData()
+    function handleDelete() {
+        let localData = JSON.parse(localStorage.getItem("medicine"));
+        let fData = localData.filter((l) => l.id !== did);
+        localStorage.setItem("medicine", JSON.stringify(fData));
+        loadData();
+        handleClose();
+    }
+
+    const handleEdit = () => {
+
     }
 
 
@@ -93,9 +111,18 @@ function Medicines(props) {
             headerName: 'Action',
             width: 130,
             renderCell: (params) => (
-                <IconButton aria-label="delete" onClick={()=>handleDelete(params)}>
-                    <DeleteIcon />
-                </IconButton>
+                <>
+                    <Tooltip title="edit data">
+                    <IconButton aria-label="edit" onClick={() => { handleUpdate(params) }}>
+                            <EditIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete data">
+                        <IconButton aria-label="delete" onClick={() => { handleDClickOpen(); setDid(params.id) }}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </Tooltip>
+                </>
             )
         }
     ];
@@ -125,6 +152,7 @@ function Medicines(props) {
                     <Form onSubmit={handleSubmit}>
                         <DialogContent>
                             <TextField
+                                value={values.name}
                                 margin="dense"
                                 name="name"
                                 label="Medicine name"
@@ -136,6 +164,7 @@ function Medicines(props) {
                             />
                             {errors.name && touched.name ? <p>{errors.name}</p> : ''}
                             <TextField
+                                value={values.price}
                                 margin="dense"
                                 name="price"
                                 label="price"
@@ -147,6 +176,7 @@ function Medicines(props) {
                             />
                             {errors.price && touched.price ? <p>{errors.price}</p> : ''}
                             <TextField
+                                value={values.quantity}
                                 margin="dense"
                                 name="quantity"
                                 label="quantity"
@@ -158,6 +188,7 @@ function Medicines(props) {
                             />
                             {errors.quantity && touched.quantity ? <p>{errors.quantity}</p> : ''}
                             <TextField
+                                value={values.expiry}
                                 margin="dense"
                                 name="expiry"
                                 label="expiry"
@@ -170,7 +201,12 @@ function Medicines(props) {
                             {errors.expiry && touched.expiry ? <p>{errors.expiry}</p> : ''}
                             <DialogActions>
                                 <Button onClick={handleClose}>Cancel</Button>
-                                <Button type="submit">Add</Button>
+                                {
+                                    update ?
+                                        <Button type="submit">Upadte</Button>
+                                    :
+                                        <Button type="submit">Add</Button>
+                                }
                             </DialogActions>
                         </DialogContent>
                     </Form>
@@ -186,6 +222,22 @@ function Medicines(props) {
                     checkboxSelection
                 />
             </div>
+            <Dialog
+                open={dopen}
+                onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Are you sure want to remove data?"}
+                </DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleClose}>Disagree</Button>
+                    <Button onClick={handleDelete} autoFocus>
+                        Agree
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
