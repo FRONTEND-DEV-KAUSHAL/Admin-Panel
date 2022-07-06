@@ -32,6 +32,7 @@ function Medicines(props) {
     const handleClose = () => {
         setOpen(false);
         setDOpen(false);
+        setUpadate(false)
         formikObj.resetForm()
 
     };
@@ -41,7 +42,6 @@ function Medicines(props) {
         let localData = JSON.parse(localStorage.getItem("medicine"))
 
         let id = Math.floor(Math.random() * 1000);
-        console.log(id);
 
         let data = {
             id: id,
@@ -74,18 +74,34 @@ function Medicines(props) {
         },
         validationSchema: schema,
         onSubmit: values => {
-            handleInsert(values);
+            if (update) {
+                handleUpdate(values);
+
+            } else {
+                
+                handleInsert(values);
+            }
+            
         },
         enableReinitialize: true,
     });
 
     const { handleChange, errors, handleSubmit, handleBlur, touched, values } = formikObj;
 
-    const handleUpdate = (params) => {
-        console.log(params);
-        formikObj.setValues(params.row)
-        handleClickOpen();
-        setUpadate(true)
+    const handleUpdate = (values) => {
+        let localData = JSON.parse(localStorage.getItem("medicine"));
+        let uData = localData.map((d) => {
+            if(d.id === values.id){
+                return values;
+            } else {
+                return d;
+            }
+        })
+
+        localStorage.setItem("medicine", JSON.stringify(uData));
+        loadData()
+        formikObj.resetForm();
+        handleClose()
     }
 
     function handleDelete() {
@@ -96,8 +112,10 @@ function Medicines(props) {
         handleClose();
     }
 
-    const handleEdit = () => {
-
+    const handleEdit = (params) => {
+        setUpadate(true);
+        handleClickOpen();
+        formikObj.setValues(params.row)
     }
 
 
@@ -113,7 +131,7 @@ function Medicines(props) {
             renderCell: (params) => (
                 <>
                     <Tooltip title="edit data">
-                    <IconButton aria-label="edit" onClick={() => { handleUpdate(params) }}>
+                    <IconButton aria-label="edit" onClick={() => { handleEdit(params) }}>
                             <EditIcon />
                         </IconButton>
                     </Tooltip>
@@ -139,7 +157,7 @@ function Medicines(props) {
     useEffect(() => {
         loadData()
     }, [])
-
+    console.log(values.name);
     return (
         <div>
             <h2>Medicines</h2>
