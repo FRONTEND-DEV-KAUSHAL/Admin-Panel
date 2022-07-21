@@ -11,18 +11,18 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import * as yup from 'yup';
 import { Form, Formik, useFormik } from 'formik';
 import { DataGrid } from '@mui/x-data-grid';
-import { Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
 function Medicines(props) {
-    const [open, setOpen] = useState(false);
-    const [dopen, setDOpen] = useState(false);
-    const [data, setData] = useState([]);
-    const [did, setDid] = useState(0)
-    const [update, setUpadate] = useState(false)
+    const [open, setOpen] = useState(false);            // dialog open and close 
+    const [dopen, setDopen] = useState(false);          // delete popup  
+    const [data, setData] = useState([]);               //row data , store localstorage
+    const [did, setDid] = useState(0)                   // delete id
+    const [toggle, setToggle] = useState(false)         // update, add toggle
+    const [search , setSearch]= useState([])
 
-    const handleDClickOpen = () => {
-        setDOpen(true);
+    const handleClickDopen = () => {
+        setDopen(true);
     };
 
     const handleClickOpen = () => {
@@ -31,23 +31,20 @@ function Medicines(props) {
 
     const handleClose = () => {
         setOpen(false);
-        setDOpen(false);
-        setUpadate(false)
+        setDopen(false);
+        setToggle(false)
         formikObj.resetForm()
-
     };
-
+    // handleinsert  for data insert 
     const handleInsert = (values) => {
         console.log(values);
         let localData = JSON.parse(localStorage.getItem("medicine"))
-
         let id = Math.floor(Math.random() * 1000);
-
+        console.log(id);
         let data = {
             id: id,
             ...values
         }
-
         if (localData === null) {
             localStorage.setItem("medicine", JSON.stringify([data]))
         } else {
@@ -58,6 +55,23 @@ function Medicines(props) {
         loadData()
     }
 
+    // handleUpdatedata for data update in localstorage
+    const handleUpdatedata = (values) => {
+        let localData = JSON.parse(localStorage.getItem("medicine"));
+        let uData = localData.map((l) => {
+            if (l.id === values.id) {
+                return values;
+            } else {
+                return l;
+            }
+        })
+        // console.log(values);
+        localStorage.setItem("medicine", JSON.stringify(uData))
+        handleClose()
+        loadData()
+    }
+
+    // schema
     let schema = yup.object().shape({
         name: yup.string().required("please enter Medicine Name"),
         price: yup.number().required("please enter Medicine price").positive().integer(),
@@ -65,6 +79,7 @@ function Medicines(props) {
         expiry: yup.string().required("please enter Medicine expiry"),
     });
 
+    // formik 
     const formikObj = useFormik({
         initialValues: {
             name: '',
@@ -74,51 +89,37 @@ function Medicines(props) {
         },
         validationSchema: schema,
         onSubmit: values => {
-            if (update) {
-                handleUpdate(values);
-
+            if (toggle) {
+                handleUpdatedata(values)
             } else {
-                
                 handleInsert(values);
             }
-            
+            //  alert(JSON.stringify(values, null, 2));
         },
         enableReinitialize: true,
     });
-
+    // formik destructring 
     const { handleChange, errors, handleSubmit, handleBlur, touched, values } = formikObj;
 
-    const handleUpdate = (values) => {
+    // handleDelete for delete data record     
+    const handleDelete = () => {
+        // console.log(params.id);
         let localData = JSON.parse(localStorage.getItem("medicine"));
-        let uData = localData.map((d) => {
-            if(d.id === values.id){
-                return values;
-            } else {
-                return d;
-            }
-        })
-
-        localStorage.setItem("medicine", JSON.stringify(uData));
+        let fData = localData.filter((l) => l.id !== did)
+        localStorage.setItem("medicine", JSON.stringify(fData))
         loadData()
-        formikObj.resetForm();
         handleClose()
     }
 
-    function handleDelete() {
-        let localData = JSON.parse(localStorage.getItem("medicine"));
-        let fData = localData.filter((l) => l.id !== did);
-        localStorage.setItem("medicine", JSON.stringify(fData));
-        loadData();
-        handleClose();
-    }
-
+    // handleEdit for click on edit button and get row data
     const handleEdit = (params) => {
-        setUpadate(true);
-        handleClickOpen();
+        handleClickOpen()
         formikObj.setValues(params.row)
+        console.log(params.row);
+        setToggle(true);
     }
 
-
+    // columns 
     const columns = [
         { field: 'name', headerName: 'Medicine Name', width: 130 },
         { field: 'price', headerName: 'Price', width: 130 },
@@ -130,42 +131,77 @@ function Medicines(props) {
             width: 130,
             renderCell: (params) => (
                 <>
-                    <Tooltip title="edit data">
-                    <IconButton aria-label="edit" onClick={() => { handleEdit(params) }}>
-                            <EditIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete data">
-                        <IconButton aria-label="delete" onClick={() => { handleDClickOpen(); setDid(params.id) }}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton aria-label="edit" onClick={() => handleEdit(params)}>
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton aria-label="delete" onClick={() => { handleClickDopen(); setDid(params.id) }}>
+                        <DeleteIcon />
+                    </IconButton>
                 </>
             )
         }
     ];
-
+    // load data 
     const loadData = () => {
-
         let localData = JSON.parse(localStorage.getItem("medicine"));
-
         if (localData !== null) {
             setData(localData);
         }
     }
-
     useEffect(() => {
         loadData()
     }, [])
-    console.log(values.name);
+
+    const hancleSearch = (value) => {
+        let localData = JSON.parse(localStorage.getItem("medicine"));
+        let fData = localData.filter((l) => (
+            l.name.toLowerCase().includes(value.toLowerCase()) ||
+            l.price.toString().includes(value) ||
+            l.quantity.toString().includes(value) ||
+            l.expiry.toString().includes(value)
+        ))
+        setSearch(fData)
+        // console.log(fData);
+    }
+
+    const finalData =  search.length > 0 ? search :  data 
+
     return (
         <div>
             <h2>Medicines</h2>
             <Button variant="outlined" onClick={handleClickOpen}>
                 Add Medicine
             </Button>
+            <TextField
+                margin="dense"
+                name="search"
+                label="Search Medicine "
+                type="text"
+                fullWidth
+                variant="standard"
+                onChange={(e) => hancleSearch(e.target.value)}
+            />
+            <Dialog
+                open={dopen}
+                onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Are you sure to delete this data ?"}
+                </DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleClose}>No</Button>
+                    <Button onClick={handleDelete} autoFocus>
+                        Yes
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Dialog open={open} onClose={handleClose} fullWidth>
-                <DialogTitle>Add medicine</DialogTitle>
+                {
+                    toggle ? <DialogTitle>Update Medicine Data</DialogTitle>
+                        : <DialogTitle>Add medicine</DialogTitle>
+                }
                 <Formik values={formikObj}>
                     <Form onSubmit={handleSubmit}>
                         <DialogContent>
@@ -220,10 +256,8 @@ function Medicines(props) {
                             <DialogActions>
                                 <Button onClick={handleClose}>Cancel</Button>
                                 {
-                                    update ?
-                                        <Button type="submit">Upadte</Button>
-                                    :
-                                        <Button type="submit">Add</Button>
+                                    toggle ? <Button type="submit">Update</Button>
+                                        : <Button type="submit">Add</Button>
                                 }
                             </DialogActions>
                         </DialogContent>
@@ -233,29 +267,13 @@ function Medicines(props) {
             <h4>Data table</h4>
             <div style={{ height: 400, width: '100%' }}>
                 <DataGrid
-                    rows={data}
+                    rows={finalData}
                     columns={columns}
                     pageSize={5}
                     rowsPerPageOptions={[5]}
                     checkboxSelection
                 />
             </div>
-            <Dialog
-                open={dopen}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {"Are you sure want to remove data?"}
-                </DialogTitle>
-                <DialogActions>
-                    <Button onClick={handleClose}>Disagree</Button>
-                    <Button onClick={handleDelete} autoFocus>
-                        Agree
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </div>
     );
 }
