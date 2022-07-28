@@ -5,11 +5,13 @@ import Medicine from './container/medicine/Medicine';
 import Patients from './container/patients/Patients';
 import Layout from './component/layout/Layout';
 import { Provider } from 'react-redux';
+import { Store } from 'redux';
+import Counter from '../src/container/counter/Counter'
 
 function App() {
   return (
-    <Provider store={store}>
-      <Layout >
+    <Provider Store={store}>
+      <Layout>
     <Switch>
       <Route path={'/Medicine'} exact component={Medicine} ></Route>
       <Route path={'/Patients'} exact component={Patients} ></Route>
