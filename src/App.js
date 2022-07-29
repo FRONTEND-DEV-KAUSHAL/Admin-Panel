@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
-import { Route, Switch } from 'react-router-dom';
-import Medicine from './container/medicine/Medicine';
-import Patients from './container/patients/Patients';
-import Layout from './component/layout/Layout';
-import { Provider } from 'react-redux';
-import { Store } from 'redux';
-import Counter from '../src/container/counter/Counter'
+import { Provider } from "react-redux";
+import { Route, Switch } from "react-router-dom";
+import Layout from "./component/layout/Layout";
+import Doctors from "./container/doctors/Doctors";
+import Medicines from "./container/medicine/Medicine";
+import Patients from "./container/patients/Patients";
+import {  useSelector } from 'react-redux';
+import { conFigure } from "./redux/Store";
+import { rootCounter } from "./redux/reducer/Index";
+import Counter from "./container/counter/Counter";
+
 
 function App() {
+
+    const store = conFigure()
+
   return (
-    <Provider Store={store}>
+    <>
+    <Provider store={store}>
       <Layout>
-    <Switch>
-      <Route path={'/Medicine'} exact component={Medicine} ></Route>
-      <Route path={'/Patients'} exact component={Patients} ></Route>
-      <Route path={'/Counter'} exact component={Counter} ></Route>
-    </Switch>
-    </Layout>
-    </Provider>
-    
+        <Switch>
+          <Route path={'/medicines'} exact component={Medicines}></Route>
+          <Route path={'/patients'} exact component={Patients}></Route>
+          <Route path={'/doctors'} exact component={Doctors}></Route>
+          <Route path={'/counter'} exact component={Counter}></Route>
+        </Switch>
+      </Layout>
+      </Provider>
+    </>
   );
 }
 

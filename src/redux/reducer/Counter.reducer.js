@@ -1,4 +1,4 @@
-import * as Action from "../Action"
+import * as Action from "../ActionTypes"
 
 const initval = {
     counter: 0

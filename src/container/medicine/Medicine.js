@@ -12,6 +12,7 @@ import * as yup from 'yup';
 import { Form, Formik, useFormik } from 'formik';
 import { DataGrid } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
+import { useSelector } from 'react-redux';
 
 function Medicines(props) {
     const [open, setOpen] = useState(false);            // dialog open and close 
@@ -24,6 +25,8 @@ function Medicines(props) {
     const handleClickDopen = () => {
         setDopen(true);
     };
+
+    const c = useSelector(state => state.counter)
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -168,7 +171,7 @@ function Medicines(props) {
 
     return (
         <div>
-            <h2>Medicines</h2>
+            <h2>Medicines {c.counter}</h2>
             <Button variant="outlined" onClick={handleClickOpen}>
                 Add Medicine
             </Button>
