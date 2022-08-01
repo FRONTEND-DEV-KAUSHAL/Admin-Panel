@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { decrement, increment } from '../../redux/Action/Counter.action';
+import { decrement, increment } from '../../redux/action/Counter.Action';
 
 function Counter(props) {
     const c = useSelector(state => state.counter)
@@ -13,7 +13,7 @@ function Counter(props) {
 
     const handleDecrement = () => {
         dispatch(decrement())
-    }
+    }   
     return (
         <div>
             <Button  onClick={() => handleIncrement()}>+</Button> 
