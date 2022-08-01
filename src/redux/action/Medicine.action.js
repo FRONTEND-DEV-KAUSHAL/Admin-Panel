@@ -1,23 +1,14 @@
-import * as Actiontypes from '../Action'
+import { BASE_URL } from '../../shared/url';
+import  * as Actiontypes from '../ActionTypes'
 
-const initval = {
-    isLoading: false,
-    medicine: [],
-    error: ''
-}
-
-export const MedicineReducer = (state = initval, action) => {
-    console.log( action.payload);
-    switch (action.type) {
-        case Actiontypes.MEDICINE_GETDATA:
-            return {
-                ...state,
-                isLoading: false,
-                medicine: action.payload,
-                error: ''
-            }
-            
-        default:
-            return state;
+export const getMedicines = () => (dispatch) => {
+    try {
+        fetch(BASE_URL + 'medicines')
+            .then((response) => response.json())
+            .then((data) => dispatch({type : Actiontypes.MEDICINE_GETDATA, payload : data} ))
+            .catch((error)=> console.log(error));   
+        
+    } catch (error) {
+        console.log(error);
     }
 }

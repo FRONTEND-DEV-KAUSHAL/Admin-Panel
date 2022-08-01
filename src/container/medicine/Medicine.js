@@ -12,7 +12,8 @@ import * as yup from 'yup';
 import { Form, Formik, useFormik } from 'formik';
 import { DataGrid } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getMedicines } from '../../redux/action/Medicine.action';
 
 function Medicines(props) {
     const [open, setOpen] = useState(false);            // dialog open and close 
@@ -151,8 +152,13 @@ function Medicines(props) {
             setData(localData);
         }
     }
+
+    const dispatch = useDispatch()
+    const medicines = useSelector(state => state.medicine)
+
     useEffect(() => {
-        loadData()
+        // loadData()
+        dispatch(getMedicines())
     }, [])
 
     const hancleSearch = (value) => {
@@ -165,6 +171,7 @@ function Medicines(props) {
         ))
         setSearch(fData)
         // console.log(fData);
+
     }
 
     const finalData =  search.length > 0 ? search :  data 
@@ -270,7 +277,7 @@ function Medicines(props) {
             <h4>Data table</h4>
             <div style={{ height: 400, width: '100%' }}>
                 <DataGrid
-                    rows={finalData}
+                    rows={medicines.medicine}
                     columns={columns}
                     pageSize={5}
                     rowsPerPageOptions={[5]}
