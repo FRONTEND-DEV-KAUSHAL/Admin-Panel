@@ -1,5 +1,5 @@
 import { createStore , applyMiddleware } from "redux";
-import { rootCounter } from "./reducer/Index";
+import { rootCounter } from "../redux/reducer/Index";
 import thunk from 'redux-thunk'
 
 export const conFigure = () => {
