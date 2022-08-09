@@ -1,4 +1,4 @@
-import * as Actiontypes from '../../redux/ActionTypes'
+import * as Actiontypes from '../ActionTypes'
 
 const initval = {
     isLoading: false,
@@ -7,7 +7,7 @@ const initval = {
 }
 
 export const MedicineReducer = (state = initval, action) => {
-    console.log( action.type, action.payload);
+    console.log(action.type, action.payload);
     switch (action.type) {
         case Actiontypes.MEDICINE_GETDATA:
             return {
@@ -22,13 +22,6 @@ export const MedicineReducer = (state = initval, action) => {
                 isLoading: true,
                 error: ''
             }
-        case Actiontypes.MEDICINE_ADDDATA:
-            return {
-                ...state,
-                isLoading: false,
-                medicine: state.medicine.concat(action.payload),
-                error: ''
-            }
         case Actiontypes.ERROR_MEDICINES:
             return {
                 ...state,
@@ -36,7 +29,20 @@ export const MedicineReducer = (state = initval, action) => {
                 medicine: [],
                 error: action.payload
             }
-
+        case Actiontypes.MEDICINE_ADDDATA:
+            return {
+                ...state,
+                isLoading: false,
+                medicine: state.medicine.concat(action.payload),
+                error: ''
+            }
+        case Actiontypes.MEDICINE_DELETE:
+            return {
+                ...state,
+                isLoading: false,
+                medicine: state.medicine.filter((m) => m.id !== action.payload),
+                error: ''
+            }
         default:
             return state;
     }

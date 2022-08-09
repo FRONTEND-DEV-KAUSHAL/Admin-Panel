@@ -1,66 +1,31 @@
 {
   "medicines": [
     {
-      "id": 1,
-      "name": "ABC",
-      "price": 500,
-      "quantity": 10,
-      "expiry": 2024
+      "id": 42,
+      "name": "abcdef",
+      "price": "52",
+      "quantity": "28",
+      "expiry": "2025"
     },
     {
-      "id": 2,
+      "id": 557,
       "name": "XYZ",
-      "price": 350,
-      "quantity": 15,
-      "expiry": 2025
+      "price": "50",
+      "quantity": "5",
+      "expiry": "2023"
     },
     {
-      "id": 3,
-      "name": "MNO",
-      "price": 200,
-      "quantity": 30,
-      "expiry": 2025
-    },
-    {
-      "id": 4,
-      "name": "PQR",
-      "price": 110,
-      "quantity": 25,
-      "expiry": 2023
-    },
-    {
-      "id": 5,
-      "name": "STU",
-      "price": 225,
-      "quantity": 16,
-      "expiry": 2022
-    },
-    {
-      "id": 5,
-      "name": "STU",
-      "price": 225,
-      "quantity": 16,
-      "expiry": 2022
+      "id": 587,
+      "name": "XYZABC",
+      "price": "5",
+      "quantity": "2",
+      "expiry": "2023"
     }
   ],
   "Patients": [
     {
-      "id": 1,
-      "name": "abcd",
-      "age": 20,
-      "phone": 1234567890,
-      "city": "surat"
-    },
-    {
-      "id": 2,
-      "name": "XYZ",
-      "age": 30,
-      "phone": 1234567890,
-      "city": "rajkot"
-    },
-    {
       "id": 3,
-      "name": "STUV",
+      "name": "STU",
       "age": 25,
       "phone": 1234567890,
       "city": "gandhinagar"
@@ -68,7 +33,7 @@
     {
       "id": 4,
       "name": "MNO",
-      "age": 55,
+      "age": "50",
       "phone": 1234567890,
       "city": "ahemdabad"
     },
@@ -78,39 +43,33 @@
       "age": 22,
       "phone": "1533131316",
       "city": "vadodra"
+    },
+    {
+      "id": 723,
+      "name": "ass",
+      "age": "41",
+      "phone": "1234567890",
+      "city": "sdgvd"
     }
   ],
-
-  "Doctore": [
-  {
-    "id": 166,
-    "fname": "PQR",
-    "lname": "A",
-    "specialty": "Orthopedics"
-  },
-  {
-    "id": 212,
-    "fname": "ABC",
-    "lname": "D",
-    "specialty": "General Surgery"
-  },
-  {
-    "id": 304,
-    "fname": "Xyz",
-    "lname": "G",
-    "specialty": "Dentist."
-  },
-  {
-    "id": 256,
-    "fname": "Mno",
-    "lname": "E",
-    "specialty": "Gynecologist"
-  },
-  {
-    "id": 785,
-    "fname": "Bcd",
-    "lname": "H",
-    "specialty": "Cardiologist"
-  }
-]
+  "Doctors": [
+    {
+      "id": 785,
+      "fname": "Bcd",
+      "lname": "Hzfde",
+      "specialty": "Cardiologist"
+    },
+    {
+      "id": 102,
+      "fname": "fvgsdgfg",
+      "lname": "dsfsf",
+      "specialty": "fdsaf"
+    },
+    {
+      "id": 202,
+      "fname": "Bcdfgd",
+      "lname": "Hdf",
+      "specialty": "Cardiologist"
+    }
+  ]
 }

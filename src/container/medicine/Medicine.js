@@ -13,7 +13,7 @@ import { Form, Formik, useFormik } from 'formik';
 import { DataGrid } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import { useDispatch, useSelector } from 'react-redux';
-import { getMedicines } from '../../redux/action/Medicine.action';
+import { addMedicines, deleteMedicines, getMedicines, updateMedicines } from '../../redux/action/Medicine.action';
 
 function Medicines(props) {
     const [open, setOpen] = useState(false);            // dialog open and close 
@@ -21,7 +21,7 @@ function Medicines(props) {
     const [data, setData] = useState([]);               //row data , store localstorage
     const [did, setDid] = useState(0)                   // delete id
     const [toggle, setToggle] = useState(false)         // update, add toggle
-    const [search , setSearch]= useState([])
+    const [search, setSearch] = useState([])
 
     const handleClickDopen = () => {
         setDopen(true);
@@ -49,28 +49,30 @@ function Medicines(props) {
             id: id,
             ...values
         }
-        if (localData === null) {
-            localStorage.setItem("medicine", JSON.stringify([data]))
-        } else {
-            localData.push(data)
-            localStorage.setItem("medicine", JSON.stringify(localData))
-        }
-        handleClose()
-        loadData()
+        dispatch(addMedicines(data))
+        // if (localData === null) {
+        //     localStorage.setItem("medicine", JSON.stringify([data]))
+        // } else {
+        //     localData.push(data)
+        //     localStorage.setItem("medicine", JSON.stringify(localData))
+        // }
+        // handleClose()
+        // loadData()
     }
 
     // handleUpdatedata for data update in localstorage
     const handleUpdatedata = (values) => {
-        let localData = JSON.parse(localStorage.getItem("medicine"));
-        let uData = localData.map((l) => {
-            if (l.id === values.id) {
-                return values;
-            } else {
-                return l;
-            }
-        })
+        // let localData = JSON.parse(localStorage.getItem("medicine"));
+        // let uData = localData.map((l) => {
+        //     if (l.id === values.id) {
+        //         return values;
+        //     } else {
+        //         return l;
+        //     }
+        // })
+        dispatch(updateMedicines(values))
         // console.log(values);
-        localStorage.setItem("medicine", JSON.stringify(uData))
+        // localStorage.setItem("medicine", JSON.stringify(uData))
         handleClose()
         loadData()
     }
@@ -108,9 +110,11 @@ function Medicines(props) {
     // handleDelete for delete data record     
     const handleDelete = () => {
         // console.log(params.id);
-        let localData = JSON.parse(localStorage.getItem("medicine"));
-        let fData = localData.filter((l) => l.id !== did)
-        localStorage.setItem("medicine", JSON.stringify(fData))
+        // let localData = JSON.parse(localStorage.getItem("medicine"));
+        // let fData = localData.filter((l) => l.id !== did)
+        // localStorage.setItem("medicine", JSON.stringify(fData))
+        dispatch(deleteMedicines(did))
+
         loadData()
         handleClose()
     }
@@ -154,7 +158,7 @@ function Medicines(props) {
     }
 
     const dispatch = useDispatch()
-    const medicines = useSelector(state => state.medicine)
+    const medicine = useSelector(state => state.medicine)
 
     useEffect(() => {
         // loadData()
@@ -174,116 +178,126 @@ function Medicines(props) {
 
     }
 
-    const finalData =  search.length > 0 ? search :  data 
+    const finalData = search.length > 0 ? search : data
 
     return (
         <div>
-            <h2>Medicines {c.counter}</h2>
-            <Button variant="outlined" onClick={handleClickOpen}>
-                Add Medicine
-            </Button>
-            <TextField
-                margin="dense"
-                name="search"
-                label="Search Medicine "
-                type="text"
-                fullWidth
-                variant="standard"
-                onChange={(e) => hancleSearch(e.target.value)}
-            />
-            <Dialog
-                open={dopen}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {"Are you sure to delete this data ?"}
-                </DialogTitle>
-                <DialogActions>
-                    <Button onClick={handleClose}>No</Button>
-                    <Button onClick={handleDelete} autoFocus>
-                        Yes
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog open={open} onClose={handleClose} fullWidth>
-                {
-                    toggle ? <DialogTitle>Update Medicine Data</DialogTitle>
-                        : <DialogTitle>Add medicine</DialogTitle>
-                }
-                <Formik values={formikObj}>
-                    <Form onSubmit={handleSubmit}>
-                        <DialogContent>
+            {
+                medicine.isLoading ?
+                    <p>Loading....</p>
+                    :
+                    medicine.error !== '' ?
+                        <p>{medicine.error}</p>
+                        :
+                        <div>
+                            <h2>Medicines {c.counter}</h2>
+                            <Button variant="outlined" onClick={handleClickOpen}>
+                                Add Medicine
+                            </Button>
                             <TextField
-                                value={values.name}
                                 margin="dense"
-                                name="name"
-                                label="Medicine name"
+                                name="search"
+                                label="Search Medicine "
                                 type="text"
                                 fullWidth
                                 variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
+                                onChange={(e) => hancleSearch(e.target.value)}
                             />
-                            {errors.name && touched.name ? <p>{errors.name}</p> : ''}
-                            <TextField
-                                value={values.price}
-                                margin="dense"
-                                name="price"
-                                label="price"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                            />
-                            {errors.price && touched.price ? <p>{errors.price}</p> : ''}
-                            <TextField
-                                value={values.quantity}
-                                margin="dense"
-                                name="quantity"
-                                label="quantity"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                            />
-                            {errors.quantity && touched.quantity ? <p>{errors.quantity}</p> : ''}
-                            <TextField
-                                value={values.expiry}
-                                margin="dense"
-                                name="expiry"
-                                label="expiry"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                            />
-                            {errors.expiry && touched.expiry ? <p>{errors.expiry}</p> : ''}
-                            <DialogActions>
-                                <Button onClick={handleClose}>Cancel</Button>
+                            <Dialog
+                                open={dopen}
+                                onClose={handleClose}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                            >
+                                <DialogTitle id="alert-dialog-title">
+                                    {"Are you sure to delete this data ?"}
+                                </DialogTitle>
+                                <DialogActions>
+                                    <Button onClick={handleClose}>No</Button>
+                                    <Button onClick={handleDelete} autoFocus>
+                                        Yes
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                            <Dialog open={open} onClose={handleClose} fullWidth>
                                 {
-                                    toggle ? <Button type="submit">Update</Button>
-                                        : <Button type="submit">Add</Button>
+                                    toggle ? <DialogTitle>Update Medicine Data</DialogTitle>
+                                        : <DialogTitle>Add medicine</DialogTitle>
                                 }
-                            </DialogActions>
-                        </DialogContent>
-                    </Form>
-                </Formik>
-            </Dialog>
-            <h4>Data table</h4>
-            <div style={{ height: 400, width: '100%' }}>
-                <DataGrid
-                    rows={medicines.medicine}
-                    columns={columns}
-                    pageSize={5}
-                    rowsPerPageOptions={[5]}
-                    checkboxSelection
-                />
-            </div>
+                                <Formik values={formikObj}>
+                                    <Form onSubmit={handleSubmit}>
+                                        <DialogContent>
+                                            <TextField
+                                                value={values.name}
+                                                margin="dense"
+                                                name="name"
+                                                label="Medicine name"
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.name && touched.name ? <p>{errors.name}</p> : ''}
+                                            <TextField
+                                                value={values.price}
+                                                margin="dense"
+                                                name="price"
+                                                label="price"
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.price && touched.price ? <p>{errors.price}</p> : ''}
+                                            <TextField
+                                                value={values.quantity}
+                                                margin="dense"
+                                                name="quantity"
+                                                label="quantity"
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.quantity && touched.quantity ? <p>{errors.quantity}</p> : ''}
+                                            <TextField
+                                                value={values.expiry}
+                                                margin="dense"
+                                                name="expiry"
+                                                label="expiry"
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.expiry && touched.expiry ? <p>{errors.expiry}</p> : ''}
+                                            <DialogActions>
+                                                <Button onClick={handleClose}>Cancel</Button>
+                                                {
+                                                    toggle ? <Button type="submit">Update</Button>
+                                                        : <Button type="submit">Add</Button>
+                                                }
+                                            </DialogActions>
+                                        </DialogContent>
+                                    </Form>
+                                </Formik>
+                            </Dialog>
+                            <h4>Data table</h4>
+                            <div style={{ height: 400, width: '100%' }}>
+                                <DataGrid
+                                    rows={medicine.medicine}
+                                    columns={columns}
+                                    pageSize={5}
+                                    rowsPerPageOptions={[5]}
+                                    checkboxSelection
+                                />
+                            </div>
+                        </div>
+            }
         </div>
     );
 }

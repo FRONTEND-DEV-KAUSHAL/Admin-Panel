@@ -11,6 +11,8 @@ import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { useDispatch, useSelector } from 'react-redux';
+import { addDoctors, deleteDoctors, getDoctors, updateDoctors } from '../../redux/action/Doctor.action';
 
 function Doctors(props) {
     const [open, setOpen] = useState(false);
@@ -43,32 +45,35 @@ function Doctors(props) {
             id: id,
             ...values
         }
-        if (localData === null) {
-            localStorage.setItem("doctors", JSON.stringify([data]))
-        } else {
-            localData.push(data)
-            localStorage.setItem("doctors", JSON.stringify(localData))
-        }
+        dispatch(addDoctors(data))
+        // if (localData === null) {
+        //     localStorage.setItem("doctors", JSON.stringify([data]))
+        // } else {
+        //     localData.push(data)
+        //     localStorage.setItem("doctors", JSON.stringify(localData))
+        // }
         handleClose()
         loadData()
     }
     const handleUpdateData = (values) => {
-        let localData = JSON.parse(localStorage.getItem("doctors"))
-        let uData = localData.map((u) => {
-            if (u.id === values.id) {
-                return values;
-            } else {
-                return u;
-            }
-        })
+        // let localData = JSON.parse(localStorage.getItem("doctors"))
+        // let uData = localData.map((u) => {
+        //     if (u.id === values.id) {
+        //         return values;
+        //     } else {
+        //         return u;
+        //     }
+        // })
         // console.log(values);
-        localStorage.setItem("doctors", JSON.stringify(uData))
+        // localStorage.setItem("doctors", JSON.stringify(uData))
+        dispatch(updateDoctors(values))
+
         handleClose()
         loadData()
     }
 
     let schema = yup.object().shape({
-        code: yup.number().required("please enter doctor's code number").positive().integer(),
+        id: yup.number().required("please enter doctor's code number").positive().integer(),
         fname: yup.string().required("please enter first name"),
         lname: yup.string().required("please enter last name"),
         specialty: yup.string().required("please enter doctor's specialty"),
@@ -76,7 +81,7 @@ function Doctors(props) {
 
     const formik = useFormik({
         initialValues: {
-            code: '',
+            id: '',
             fname: '',
             lname: '',
             specialty: '',
@@ -94,9 +99,12 @@ function Doctors(props) {
 
     const handleDelete = () => {
         // console.log(params.id);
-        let localData = JSON.parse(localStorage.getItem("doctors"))
-        let fData = localData.filter((l) => l.id !== deleteid)
-        localStorage.setItem("doctors", JSON.stringify(fData))
+        // let localData = JSON.parse(localStorage.getItem("doctors"))
+        // let fData = localData.filter((l) => l.id !== deleteid)
+        // localStorage.setItem("doctors", JSON.stringify(fData))
+
+        dispatch(deleteDoctors(deleteid))
+
         loadData()
         handleClose()
     }
@@ -109,7 +117,7 @@ function Doctors(props) {
     }
 
     const columns = [
-        { field: 'code', headerName: 'Code', width: 180 },
+        { field: 'id', headerName: 'Code', width: 180 },
         { field: 'fname', headerName: 'First name', width: 180 },
         { field: 'lname', headerName: 'Last name', width: 180 },
         { field: 'specialty', headerName: 'Specialty', width: 180 },
@@ -137,14 +145,19 @@ function Doctors(props) {
             setData(localData);
         }
     }
+
+    const dispatch = useDispatch()
+    const doctors = useSelector(state => state.doctors)
+
     useEffect(() => {
-        loadData()
+        // loadData()
+        dispatch(getDoctors())
     }, [])
 
     const handleSearch = (val) => {
         let localData = JSON.parse(localStorage.getItem("doctors"));
         let fData = localData.filter((d) => (
-            d.code.toString().includes(val) ||
+            d.id.toString().includes(val) ||
             d.fname.toLowerCase().includes(val.toLowerCase()) ||
             d.lname.toLowerCase().includes(val.toLowerCase()) ||
             d.specialty.toLowerCase().includes(val.toLowerCase())
@@ -152,118 +165,128 @@ function Doctors(props) {
         console.log(fData);
         setSearch(fData)
     }
-    const finalData =  search.length > 0 ? search :  data 
+    const finalData = search.length > 0 ? search : data
 
     return (
-        <div>
-            <h2>Doctors</h2>
-            <Button variant="outlined" onClick={handleClickOpen}>
-                Add Details
-            </Button>
-            <TextField
-                margin="dense"
-                name="Search"
-                label="Search Doctor's Details"
-                type="text"
-                fullWidth
-                variant="standard"
-                onChange={(e) => handleSearch(e.target.value)}
-            />
-            <Dialog
-                open={dopen}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {"Use Google's location service?"}
-                </DialogTitle>
-                <DialogContent>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>No</Button>
-                    <Button onClick={handleDelete} autoFocus>
-                        Yes
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog open={open} onClose={handleClose} fullWidth>
-                {
-                    update ? <DialogTitle>Edit Doctors Details</DialogTitle>
-                        : <DialogTitle>Doctors Details</DialogTitle>
-                }
-                <Formik values={formik}>
-                    <Form onSubmit={handleSubmit}>
-                        <DialogContent>
+        <div >
+            {
+                doctors.isLoading ?
+                    <p> Loading....</p>
+                    :
+                    doctors.error !== '' ?
+                        <p>{doctors.error}</p>
+                        :
+                        <div>
+                            <h2>Doctors</h2>
+                            <Button variant="outlined" onClick={handleClickOpen}>
+                                Add Details
+                            </Button>
                             <TextField
-                                value={values.code}
                                 margin="dense"
-                                name="code"
-                                label="Doctor's Code"
-                                type="number"
-                                fullWidth
-                                variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                            />
-                            {errors.code && touched.code ? <p>{errors.code}</p> : ''}
-                            <TextField
-                                value={values.fname}
-                                margin="dense"
-                                name="fname"
-                                label="Doctor First Name"
+                                name="Search"
+                                label="Search Doctor's Details"
                                 type="text"
                                 fullWidth
                                 variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
+                                onChange={(e) => handleSearch(e.target.value)}
                             />
-                            {errors.fname && touched.fname ? <p>{errors.fname}</p> : ''}
-                            <TextField
-                                value={values.lname}
-                                margin="dense"
-                                name="lname"
-                                label="Doctor Last Name"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                            />
-                            {errors.lname && touched.lname ? <p>{errors.lname}</p> : ''}
-                            <TextField
-                                value={values.specialty}
-                                margin="dense"
-                                name="specialty"
-                                label="Doctor Specialty"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                            />
-                            {errors.specialty && touched.specialty ? <p>{errors.specialty}</p> : ''}
-                            <DialogActions>
-                                <Button onClick={handleClose}>Cancel</Button>
+                            <Dialog
+                                open={dopen}
+                                onClose={handleClose}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                            >
+                                <DialogTitle id="alert-dialog-title">
+                                    {"Use Google's location service?"}
+                                </DialogTitle>
+                                <DialogContent>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={handleClose}>No</Button>
+                                    <Button onClick={handleDelete} autoFocus>
+                                        Yes
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                            <Dialog open={open} onClose={handleClose} fullWidth>
                                 {
-                                    update ? <Button type='submit'>Update</Button>
-                                        : <Button type='submit'>Add</Button>
+                                    update ? <DialogTitle>Edit Doctors Details</DialogTitle>
+                                        : <DialogTitle>Doctors Details</DialogTitle>
                                 }
-                            </DialogActions>
-                        </DialogContent>
-                    </Form>
-                </Formik>
-            </Dialog>
-            <h3>Doctor's Details</h3>
-            <div style={{ height: 400, width: '100%' }}>
-                <DataGrid
-                    rows={finalData}
-                    columns={columns}
-                    pageSize={5}
-                    rowsPerPageOptions={[5]}
-                    checkboxSelection
-                />
-            </div>
+                                <Formik values={formik}>
+                                    <Form onSubmit={handleSubmit}>
+                                        <DialogContent>
+                                            <TextField
+                                                value={values.code}
+                                                margin="dense"
+                                                name="id"
+                                                label="Doctor's Code"
+                                                type="number"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.code && touched.code ? <p>{errors.code}</p> : ''}
+                                            <TextField
+                                                value={values.fname}
+                                                margin="dense"
+                                                name="fname"
+                                                label="Doctor First Name"
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.fname && touched.fname ? <p>{errors.fname}</p> : ''}
+                                            <TextField
+                                                value={values.lname}
+                                                margin="dense"
+                                                name="lname"
+                                                label="Doctor Last Name"
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.lname && touched.lname ? <p>{errors.lname}</p> : ''}
+                                            <TextField
+                                                value={values.specialty}
+                                                margin="dense"
+                                                name="specialty"
+                                                label="Doctor Specialty"
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.specialty && touched.specialty ? <p>{errors.specialty}</p> : ''}
+                                            <DialogActions>
+                                                <Button onClick={handleClose}>Cancel</Button>
+                                                {
+                                                    update ? <Button type='submit'>Update</Button>
+                                                        : <Button type='submit'>Add</Button>
+                                                }
+                                            </DialogActions>
+                                        </DialogContent>
+                                    </Form>
+                                </Formik>
+                            </Dialog>
+                            <h3>Doctor's Details</h3>
+                            <div style={{ height: 400, width: '100%' }}>
+                                <DataGrid
+                                    rows={doctors.doctors}
+                                    columns={columns}
+                                    pageSize={5}
+                                    rowsPerPageOptions={[5]}
+                                    checkboxSelection
+                                />
+                            </div>
+                        </div>
+            }
         </div>
     );
 }

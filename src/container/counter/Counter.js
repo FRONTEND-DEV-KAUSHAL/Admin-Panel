@@ -13,7 +13,7 @@ function Counter(props) {
 
     const handleDecrement = () => {
         dispatch(decrement())
-    }   
+    }
     return (
         <div>
             <Button  onClick={() => handleIncrement()}>+</Button> 
