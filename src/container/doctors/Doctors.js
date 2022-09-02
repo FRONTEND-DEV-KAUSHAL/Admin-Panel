@@ -52,6 +52,7 @@ function Doctors(props) {
         //     localData.push(data)
         //     localStorage.setItem("doctors", JSON.stringify(localData))
         // }
+        
         handleClose()
         loadData()
     }

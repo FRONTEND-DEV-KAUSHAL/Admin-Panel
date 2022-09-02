@@ -8,6 +8,7 @@ const initval = {
 }
 
 export const DoctoresReducer = (state = initval, action) => {
+    console.log(action.type,action.payload);
     switch (action.type) {
         case ActionTypes.DOCTORS_GETDATA:
             return {
