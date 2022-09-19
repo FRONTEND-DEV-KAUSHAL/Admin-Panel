@@ -1,8 +1,8 @@
 import axios from "axios";
-import { BASED_URL } from "../fetch/BasedUrl";
+import { BASE_URL } from "../Base_url/url";
 
 const instance = axios.create({
-    baseURL: BASED_URL,
+    baseURL: BASE_URL,
     timeout: 2000
 });
 

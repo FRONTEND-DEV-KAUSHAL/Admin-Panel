@@ -36,6 +36,19 @@ export const MedicineReducer = (state = initval, action) => {
                 medicine: state.medicine.concat(action.payload),
                 error: ''
             }
+        case Actiontypes.DOCTORS_UPDATE:
+                return {
+                    ...state,
+                    isLoading: false,
+                    doctors: state.doctors.map((d)=>{
+                        if(d.id === action.payload.id){
+                            return action.payload
+                        }else{
+                            return d
+                        }
+                    }),
+                    error: ''
+                }
         case Actiontypes.MEDICINE_DELETE:
             return {
                 ...state,

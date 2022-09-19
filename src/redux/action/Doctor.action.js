@@ -1,163 +1,103 @@
-import { addDoc, collection } from "firebase/firestore";
-import { addAllDoctorsdata, deleteAllDotorsData, getAllDoctorsData, updateAllDoctorsdata } from "../../common/apis/Doctors_api";
-import { BASE_URL } from "../../";
-import { db } from "../../firebase";
-import * as ActionType from '../ActionType';
+import { addDoc, collection, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore'
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { BASE_URL } from '../../Base_url/url'
+import { deleteDoctorsData, getDoctorsData, postDoctorsData, putDoctorsData } from ''
+import { db, storage } from '../../firebase'
+import * as ActionTypes from '../ActionType'
 
-export const getDoctorsData = () => (dispatch) => {
+export const getDoctors = () => async (dispatch) => {
     try {
-        setTimeout(function () {
-            dispatch(loading_doctors());
-            getAllDoctorsData()
-                .then((data) => dispatch({ type: ActionType.GET_DOCTORSDATA, payload: data.data }))
-                .catch((error) => dispatch(error_doctors(error.message)))
-            // fetch(BASED_URL + 'doctors')
-            //     .then(response => {
-            //         if (response.ok) {
-            //             return response;
-            //         } else {
-            //             var error = new Error('Error ' + response.status + ': ' + response.statusText);
-            //             error.response = response;
-            //             throw error;
-            //         }
-            //     },
-            //         error => {
-            //             var errmess = new Error(error.message);
-            //             throw errmess;
-            //         })
-            //     .then((response) => response.json())
-            //     .then((data) => dispatch({ type: ActionType.GET_DOCTORSDATA, payload: data }))
-            //     .catch((error) => dispatch(error_doctors(error.message)))
-        }, 2000);
+        const querySnapshot = await getDocs(collection(db, "Doctor"));
+        let data = []
+
+        querySnapshot.forEach((doc) => {
+            data.push({ id: doc.id, ...doc.data() })
+            console.log(`${doc.id} => ${doc.data()}`);
+        });
+
+        dispatch({ type: ActionTypes.DOCTORS_GETDATA, payload: data })
+        console.log(data);
+
     } catch (error) {
-        dispatch(error_doctors(error.message))
+        dispatch(errorDoctors(error.message))
     }
+
 }
 
-export const addDoctorsData = (data) => async(dispatch) => {
-    try {
-        const docRef = await addDoc(collection(db, "Doctors"), data);
-          console.log("Document written with ID: ", docRef.id);
-          dispatch({type : ActionType.ADD_DOCTORSDATA,payload : {id : docRef.id,...data}})
-        // addAllDoctorsdata(data)
-            // .then((data) => {
-            //     dispatch({ type: ActionType.ADD_DOCTORSDATA, payload: data.data });
-            // })
-            // .catch((error) => {
-            //     dispatch(error_doctors(error.message));
-            // });
-        // fetch(BASED_URL + "doctors", {
-        //     method: "POST",
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(data),
+export const addDoctors = (data) => async (dispatch) => {
 
-        // })
-        //     .then(response => {
-        //         if (response.ok) {
-        //             return response;
-        //         } else {
-        //             var error = new Error('Error ' + response.status + ': ' + response.statusText);
-        //             error.response = response;
-        //             throw error;
-        //         }
-        //     },
-        //         error => {
-        //             var errmess = new Error(error.message);
-        //             throw errmess;
-        //         })
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //         dispatch({ type: ActionType.ADD_DOCTORSDATA, payload: data });
-        //     })
-        //     .catch((error) => {
-        //         dispatch(error_doctors(error.message));
-        //     });
-    } catch (error) {
-        dispatch(error_doctors(error.message));
-    }
-}
-
-export const deleteDotorsData = (id) => (dispatch) => {
     try {
-        deleteAllDotorsData(id)
-            .then(dispatch({ type: ActionType.DELETE_DOCTORSDATA, payload: id }))
-            .catch((error) => {
-                dispatch(error_doctors(error.message));
+        // console.log(data);
+        let rendomNumber = Math.floor(Math.random() * 100000).toString()
+        console.log(rendomNumber);
+        const DoctorRef = ref(storage, 'Doctor/' + rendomNumber);
+
+        uploadBytes(DoctorRef, data.profile_img)
+
+            .then((snapshot) => {
+                console.log('Uploaded a blob or file!');
+
+                getDownloadURL(ref(storage, snapshot.ref))
+                    .then(async (url) => {
+                        const docRef = await addDoc(collection(db, "Doctor"), {
+                            ...data,
+                            profile_img: url,
+                            fileName: rendomNumber
+                        });
+                        console.log(url);
+                        dispatch({
+                            type: ActionTypes.DOCTORS_ADDDATA, payload: {
+                                id: docRef.id,
+                                ...data,
+                                profile_img: url
+                            }
+                        })
+                    })
             });
-        // deleteDotorsData
-        // fetch(BASED_URL + 'doctors/' + id, {
-        //     method: 'DELETE',
-        // })
-        //     .then(response => {
-        //         if (response.ok) {
-        //             return response;
-        //         } else {
-        //             var error = new Error('Error ' + response.status + ': ' + response.statusText);
-        //             error.response = response;
-        //             throw error;
-        //         }
-        //     },
-        //         error => {
-        //             var errmess = new Error(error.message);
-        //             throw errmess;
-        //         })
-        //     .then((response) => response.json())
-        //     .then(dispatch({ type: ActionType.DELETE_DOCTORSDATA, payload: id }))
-        //     .catch((error) => {
-        //         dispatch(error_doctors(error.message));
-        //     });
+
     } catch (error) {
-        dispatch(error_doctors(error.message))
+        dispatch(errorDoctors(error.message))
     }
+
 }
 
-export const updateDotoreData = (data) => (dispatch) => {
+export const deleteDoctors = (data) => async (dispatch) => {
     try {
-        updateAllDoctorsdata(data)
-            .then((data) => {
-                dispatch({ type: ActionType.UPDATE_DOCTORSDATA, payload: data.data });
-            })
-            .catch((error) => {
-                dispatch(error_doctors(error.message));
+        console.log(data);
+
+        const doctorRef = ref(storage, 'Doctor/' + data.fileName);
+        deleteObject(doctorRef)
+            .then(async() => {
+                await deleteDoc(doc(db, "Doctor", data.id));
+                dispatch({ type: ActionTypes.DOCTORS_DELETE, payload: data.id })
+            }).catch((error) => {
+                dispatch(errorDoctors(error.message));
             });
-        // fetch(BASED_URL + 'doctors/' + data.id, {
-        //     method: 'PUT',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(data),
-        // })
-        //     .then(response => {
-        //         if (response.ok) {
-        //             return response;
-        //         } else {
-        //             var error = new Error('Error ' + response.status + ': ' + response.statusText);
-        //             error.response = response;
-        //             throw error;
-        //         }
-        //     },
-        //         error => {
-        //             var errmess = new Error(error.message);
-        //             throw errmess;
-        //         })
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //         dispatch({ type: ActionType.UPDATE_DOCTORSDATA, payload: data });
-        //     })
-        //     .catch((error) => {
-        //         dispatch(error_doctors(error.message));
-        //     });
     } catch (error) {
-        dispatch(error_doctors(error.message));
+        dispatch(errorDoctors(error.message));
     }
 }
 
-export const loading_doctors = () => (dispatch) => {
-    dispatch({ type: ActionType.LOADING_DOCTORSDATA })
+export const updateDoctors = (data) => async (dispatch) => {
+
+    console.log(data.id);
+    try {
+        const DoctorRef = doc(db, "Doctor", data.id);
+
+        await updateDoc(DoctorRef, {
+            fname: data.fname,
+            lname: data.lname,
+            specialty: data.specialty
+        });
+        dispatch({ type: ActionTypes.DOCTORS_UPDATE, payload: data })
+    } catch (error) {
+        dispatch(errorDoctors(error.message));
+    }
 }
 
-export const error_doctors = (error) => (dispatch) => {
-    dispatch({ type: ActionType.ERROR_DOCTORSDATA, payload: error })
+export const loadingDoctors = () => (dispatch) => {
+    dispatch({ type: ActionTypes.LOADING_DOCTORS })
+}
+export const errorDoctors = (error) => (dispatch) => {
+    dispatch({ type: ActionTypes.ERROR_DOCTORS, payload: error })
 }
